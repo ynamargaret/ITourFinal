@@ -28,22 +28,18 @@ class SeeMorePage extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        // --- MODIFICATION FOR GLOWING CARD EFFECT ---
         decoration: BoxDecoration(
-          // Use the same dark color as the home page cards
           color: const Color(0xFF19183B),
-          // Keep the top radius for the bottom sheet style
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
-              color: Colors.blueAccent.withOpacity(0.5), // Glow color
-              blurRadius: 20, // How diffused the glow is
-              spreadRadius: 2, // How far the glow extends
-              offset: const Offset(0, -5), // Makes the glow emanate upwards
+              color: Colors.blueAccent.withOpacity(0.5),
+              blurRadius: 20,
+              spreadRadius: 2,
+              offset: const Offset(0, -5),
             ),
           ],
         ),
-        // --- END MODIFICATION ---
         child: SingleChildScrollView(
           controller: scrollController,
           child: Padding(
@@ -51,108 +47,77 @@ class SeeMorePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // small handle
                 Center(
                   child: Container(
                     height: 6,
                     width: 80,
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(6)),
                   ),
                 ),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: Text(title,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold)),
                     ),
                     Column(
                       children: [
                         const Icon(Icons.ac_unit, color: Colors.white),
                         const SizedBox(height: 4),
                         Text(
-                          temperatureC != null
-                              ? "${temperatureC!.toStringAsFixed(1)}°C"
-                              : "--°C",
-                          style: const TextStyle(color: Colors.white),
-                        ),
+                            temperatureC != null
+                                ? "${temperatureC!.toStringAsFixed(1)}°C"
+                                : "--°C",
+                            style: const TextStyle(color: Colors.white)),
                       ],
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 10),
-                Text(
-                  location,
-                  style: TextStyle(
-                    color: Colors.blue[100],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text(location,
+                    style: TextStyle(
+                        color: Colors.blue[100],
+                        fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
-
-                Text(
-                  description,
-                  style: const TextStyle(color: Colors.white70, height: 1.4),
-                ),
+                Text(description,
+                    style: const TextStyle(color: Colors.white70, height: 1.4)),
                 const SizedBox(height: 12),
-
-                // inclusions
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: inclusions
-                      .map(
-                        (inc) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.check_circle,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  inc,
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
+                      .map((inc) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.check_circle,
+                                    color: Colors.white, size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: Text(inc,
+                                        style: const TextStyle(
+                                            color: Colors.white70))),
+                              ],
+                            ),
+                          ))
                       .toList(),
                 ),
-
                 const SizedBox(height: 12),
-                Text(
-                  price,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text(price,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
-
-                // big carousel
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: ImageCarousel(images: images),
-                ),
-
+                    borderRadius: BorderRadius.circular(14),
+                    child: ImageCarousel(images: images)),
                 const SizedBox(height: 28),
               ],
             ),

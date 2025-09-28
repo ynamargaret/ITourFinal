@@ -5,6 +5,8 @@ import 'trips_page.dart';
 import 'about_us.dart';
 import 'destination.dart';
 
+// This StatefulWidget is the root of our main UI. It manages the bottom
+// navigation bar and, most importantly, holds the shared state for favorites.
 class MainTabs extends StatefulWidget {
   const MainTabs({super.key});
 
@@ -14,33 +16,35 @@ class MainTabs extends StatefulWidget {
 
 class _MainTabsState extends State<MainTabs> {
   int _index = 0;
+  // This list acts as the central "source of truth" for the user's favorite destinations.
+  // By holding the state here, we can ensure all child pages are in sync.
   List<Destination> _favorites = [];
 
+  // This function is passed down to the HomePage. When a user favorites an item,
+  // HomePage calls this function to update the state in this parent widget.
   void _updateFavorites(List<Destination> favorites) {
     setState(() {
       _favorites = favorites;
     });
   }
 
-  // --- NEW FUNCTION ---
-  // This function will be called from the FavoritesPage to remove an item.
+  // This function is passed down to the FavoritesPage. When a user unfavorites
+  // an item there, it calls this function to update the central list.
   void _removeFavorite(Destination destination) {
     setState(() {
-      // Remove the destination from the list.
-      // We also update its 'isFavorite' status for consistency.
       destination.isFavorite = false;
       _favorites.removeWhere((d) => d.title == destination.title);
     });
   }
 
-  // --- MODIFIED _pages GETTER ---
+  // A getter that builds our list of pages. Notice how the '_favorites' list
+  // and the state management functions are passed into the relevant pages.
   List<Widget> get _pages => [
-    HomePage(favorites: _favorites, onFavoritesChanged: _updateFavorites),
-
-    FavoritesPage(favorites: _favorites, onFavoriteRemoved: _removeFavorite),
-    TripsPage(),
-    AboutUsPage(),
-  ];
+        HomePage(favorites: _favorites, onFavoritesChanged: _updateFavorites),
+        FavoritesPage(favorites: _favorites, onFavoriteRemoved: _removeFavorite),
+        const TripsPage(),
+        const AboutUsPage(),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +62,7 @@ class _MainTabsState extends State<MainTabs> {
             BoxShadow(
               color: Colors.black26,
               blurRadius: 10,
-              offset: Offset(0, -3),
+              offset: const Offset(0, -3),
             ),
           ],
         ),

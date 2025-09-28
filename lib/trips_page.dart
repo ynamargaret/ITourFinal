@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:numberpicker/numberpicker.dart';
 
-// --- DATA MODELS ---
-
+// The Participant class is a data model. It defines the structure for
+// storing information about a single traveler.
 class Participant {
   String firstName;
   String lastName;
@@ -19,6 +19,8 @@ class Participant {
   });
 }
 
+// The Booking class is our main data model for this feature. It logically
+// groups all the complex information related to a single trip booking.
 class Booking {
   String packageName;
   DateTime? startDate;
@@ -41,27 +43,25 @@ class Booking {
   }) : participants = participants ?? [Participant()];
 
   Booking copy() => Booking(
-    packageName: packageName,
-    startDate: startDate,
-    endDate: endDate,
-    participants: participants
-        .map(
-          (p) => Participant(
-            firstName: p.firstName,
-            lastName: p.lastName,
-            age: p.age,
-            gender: p.gender,
-          ),
-        )
-        .toList(),
-    contactInfo: contactInfo,
-    paymentMethod: paymentMethod,
-    perPersonPrice: perPersonPrice,
-    confirmedAt: confirmedAt,
-  );
+        packageName: packageName,
+        startDate: startDate,
+        endDate: endDate,
+        participants: participants
+            .map(
+              (p) => Participant(
+                firstName: p.firstName,
+                lastName: p.lastName,
+                age: p.age,
+                gender: p.gender,
+              ),
+            )
+            .toList(),
+        contactInfo: contactInfo,
+        paymentMethod: paymentMethod,
+        perPersonPrice: perPersonPrice,
+        confirmedAt: confirmedAt,
+      );
 }
-
-// --- MAIN TRIPS PAGE WIDGET ---
 
 class TripsPage extends StatefulWidget {
   final String? prefilledDestination;
@@ -72,10 +72,11 @@ class TripsPage extends StatefulWidget {
 }
 
 class _TripsPageState extends State<TripsPage> {
+  // In a production app, this list would be fetched from a database.
+  // For this project, it's stored locally in memory.
   static final List<Booking> _bookings = [];
   DateTime? _lastWarnAt;
 
-  // --- UI COLORS & STYLES ---
   static const Color _bg = Color(0xFF19183B);
   static const Color _secondary = Color(0xFF708993);
   static const Color _accent = Color(0xFFA1C2BD);
@@ -98,7 +99,6 @@ class _TripsPageState extends State<TripsPage> {
   @override
   void initState() {
     super.initState();
-    // Auto-open booking form if destination is pre-filled
     if (widget.prefilledDestination != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _openBookingForm();
@@ -150,8 +150,6 @@ class _TripsPageState extends State<TripsPage> {
     );
   }
 
-  // --- UI BUILDER WIDGETS ---
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -178,6 +176,8 @@ class _TripsPageState extends State<TripsPage> {
     );
   }
 
+  // Each booking is displayed in a custom card widget with a glowing
+  // shadow effect for a modern and consistent look.
   Widget _buildBookingCard(Booking b, int index) {
     final dates = (b.startDate != null && b.endDate != null)
         ? '${_fmt(b.startDate!)} → ${_fmt(b.endDate!)}'
@@ -237,10 +237,8 @@ class _TripsPageState extends State<TripsPage> {
             const SizedBox(height: 8),
             _infoRow(Icons.people, '${b.participants.length} Traveler(s)'),
             const SizedBox(height: 8),
-            _infoRow(
-              Icons.payment,
-              '${b.paymentMethod} • PHP ${b.perPersonPrice} / person',
-            ),
+            _infoRow(Icons.payment,
+                '${b.paymentMethod} • PHP ${b.perPersonPrice} / person'),
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
@@ -289,8 +287,6 @@ class _TripsPageState extends State<TripsPage> {
     );
   }
 
-  // --- LOGIC & NAVIGATION ---
-
   Future<void> _openBookingForm({int? editIndex}) async {
     final isEditing = editIndex != null;
     final isFromHomePage = widget.prefilledDestination != null && !isEditing;
@@ -300,9 +296,7 @@ class _TripsPageState extends State<TripsPage> {
       if (!proceed) return;
     }
 
-    final Booking working = isEditing
-        ? _bookings[editIndex!].copy()
-        : Booking();
+    final Booking working = isEditing ? _bookings[editIndex!].copy() : Booking();
 
     if (widget.prefilledDestination != null && !isEditing) {
       working.packageName = widget.prefilledDestination!;
@@ -320,14 +314,13 @@ class _TripsPageState extends State<TripsPage> {
           onSave: (savedBooking) {
             setState(() {
               if (isEditing) {
-                _bookings[editIndex] = savedBooking
-                  ..confirmedAt = DateTime.now();
+                _bookings[editIndex] = savedBooking..confirmedAt = DateTime.now();
               } else {
                 savedBooking.confirmedAt = DateTime.now();
                 _bookings.add(savedBooking);
               }
             });
-            Navigator.pop(context); // Close the booking form
+            Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Payment Successful / Booking Confirmed'),
@@ -346,15 +339,12 @@ class _TripsPageState extends State<TripsPage> {
           barrierDismissible: false,
           builder: (context) => AlertDialog(
             backgroundColor: _card,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Text(
               'Start Booking Session',
               style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+                  color: Colors.white, fontWeight: FontWeight.bold),
             ),
             content: Text(
               'You have 10 minutes to complete your booking or it will expire.',
@@ -363,23 +353,18 @@ class _TripsPageState extends State<TripsPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'Cancel',
-                  style: GoogleFonts.poppins(color: Colors.white70),
-                ),
+                child: Text('Cancel',
+                    style: GoogleFonts.poppins(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _accent,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                      borderRadius: BorderRadius.circular(8)),
                 ),
-                child: Text(
-                  'Proceed',
-                  style: GoogleFonts.poppins(color: Colors.white),
-                ),
+                child: Text('Proceed',
+                    style: GoogleFonts.poppins(color: Colors.white)),
               ),
             ],
           ),
@@ -388,36 +373,26 @@ class _TripsPageState extends State<TripsPage> {
   }
 
   Future<void> _confirmDelete(int index) async {
-    final ok =
-        await showDialog<bool>(
+    final ok = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: _card,
-            title: Text(
-              'Cancel Booking?',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            content: Text(
-              'This will permanently delete the booking.',
-              style: GoogleFonts.poppins(color: Colors.white70),
-            ),
+            title: Text('Cancel Booking?',
+                style: GoogleFonts.poppins(color: Colors.white)),
+            content: Text('This will permanently delete the booking.',
+                style: GoogleFonts.poppins(color: Colors.white70)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'No',
-                  style: GoogleFonts.poppins(color: Colors.white70),
-                ),
+                child:
+                    Text('No', style: GoogleFonts.poppins(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                ),
-                child: Text(
-                  'Yes, Cancel',
-                  style: GoogleFonts.poppins(color: Colors.white),
-                ),
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                child: Text('Yes, Cancel',
+                    style: GoogleFonts.poppins(color: Colors.white)),
               ),
             ],
           ),
@@ -428,9 +403,6 @@ class _TripsPageState extends State<TripsPage> {
 
   static String _fmt(DateTime d) => '${d.month}/${d.day}/${d.year}';
 }
-
-// --- BOOKING FORM PAGE WIDGET ---
-// (This remains a separate page for clarity)
 
 class _BookingPage extends StatefulWidget {
   final Booking booking;
@@ -467,6 +439,8 @@ class _BookingPageState extends State<_BookingPage> {
     super.dispose();
   }
 
+  // This function implements the 10-minute session timer. It updates the UI
+  // every second and shows an expiry dialog if the time runs out.
   void _startSessionTimer() {
     _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -498,17 +472,13 @@ class _BookingPageState extends State<_BookingPage> {
         elevation: 0,
         title: Row(
           children: [
-            Text(
-              'Confirm your Booking',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
+            Text('Confirm your Booking',
+                style: GoogleFonts.poppins(color: Colors.white)),
             if (!widget.isEditing) ...[
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _timeRemaining <= 30
                       ? Colors.red
@@ -539,7 +509,10 @@ class _BookingPageState extends State<_BookingPage> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              child: _BookingForm(booking: b, onUpdate: updateBooking),
+              child: _BookingForm(
+                booking: b,
+                onUpdate: updateBooking,
+              ),
             ),
           ),
           _buildBottomBar(),
@@ -555,10 +528,7 @@ class _BookingPageState extends State<_BookingPage> {
         color: _TripsPageState._card,
         boxShadow: [
           BoxShadow(
-            color: Colors.black38,
-            blurRadius: 12,
-            offset: const Offset(0, -4),
-          ),
+              color: Colors.black38, blurRadius: 12, offset: const Offset(0, -4)),
         ],
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -569,28 +539,19 @@ class _BookingPageState extends State<_BookingPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'TOTAL',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white54,
-                    fontSize: 12,
-                  ),
-                ),
+                Text('TOTAL',
+                    style: GoogleFonts.poppins(
+                        color: Colors.white54, fontSize: 12)),
                 Text(
                   'PHP ${b.participants.length * b.perPersonPrice}',
                   style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                  ),
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800),
                 ),
-                Text(
-                  'PHP ${b.perPersonPrice} / person',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white38,
-                    fontSize: 12,
-                  ),
-                ),
+                Text('PHP ${b.perPersonPrice} / person',
+                    style: GoogleFonts.poppins(
+                        color: Colors.white38, fontSize: 12)),
               ],
             ),
           ),
@@ -612,17 +573,12 @@ class _BookingPageState extends State<_BookingPage> {
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
             ),
-            child: Text(
-              'SUBMIT',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-            ),
+            child: Text('SUBMIT', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
-
-  // --- DIALOGS AND VALIDATION ---
 
   void _showWarn(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -644,26 +600,20 @@ class _BookingPageState extends State<_BookingPage> {
       builder: (context) => AlertDialog(
         backgroundColor: _TripsPageState._card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Session Expired',
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text('Session Expired',
+            style: GoogleFonts.poppins(
+                color: Colors.white, fontWeight: FontWeight.bold)),
         content: Text(
-          'Your booking session has expired. Please start over.',
-          style: GoogleFonts.poppins(color: Colors.white70),
-        ),
+            'Your booking session has expired. Please start over.',
+            style: GoogleFonts.poppins(color: Colors.white70)),
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Close booking page
+              Navigator.pop(context);
+              Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: _TripsPageState._accent,
-            ),
+                backgroundColor: _TripsPageState._accent),
             child: Text('OK', style: GoogleFonts.poppins(color: Colors.white)),
           ),
         ],
@@ -679,66 +629,47 @@ class _BookingPageState extends State<_BookingPage> {
           builder: (context) {
             return AlertDialog(
               backgroundColor: _TripsPageState._card,
-              title: Text(
-                'Confirm Your Booking',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              title: Text('Confirm Your Booking',
+                  style: GoogleFonts.poppins(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
               content: SingleChildScrollView(
                 child: ListBody(
                   children: [
+                    Text('Package: ${b.packageName}',
+                        style: GoogleFonts.poppins(color: Colors.white70)),
                     Text(
-                      'Package: ${b.packageName}',
-                      style: GoogleFonts.poppins(color: Colors.white70),
-                    ),
-                    Text(
-                      'Dates: ${_TripsPageState._fmt(b.startDate!)} – ${_TripsPageState._fmt(b.endDate!)}',
-                      style: GoogleFonts.poppins(color: Colors.white70),
-                    ),
+                        'Dates: ${_TripsPageState._fmt(b.startDate!)} – ${_TripsPageState._fmt(b.endDate!)}',
+                        style: GoogleFonts.poppins(color: Colors.white70)),
                     const SizedBox(height: 12),
-                    Text(
-                      'Total Price: PHP $total',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    Text('Total Price: PHP $total',
+                        style: GoogleFonts.poppins(
+                            color: Colors.white, fontWeight: FontWeight.w700)),
                     const Divider(height: 24),
                     Text(
                       'By booking, you consent to your information being used for reservation purposes, in compliance with the Data Privacy Act of 2012 (RA 10173).',
                       style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
+                          color: Colors.white70, fontSize: 12),
                     ),
-                    StatefulBuilder(
-                      builder: (context, setSB) {
-                        return CheckboxListTile(
-                          title: const Text(
-                            'I agree to the Terms & Conditions',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
-                          value: agreed,
-                          onChanged: (v) => setSB(() => agreed = v ?? false),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
-                          activeColor: _TripsPageState._accent,
-                          checkColor: _TripsPageState._bg,
-                        );
-                      },
-                    ),
+                    StatefulBuilder(builder: (context, setSB) {
+                      return CheckboxListTile(
+                        title: const Text('I agree to the Terms & Conditions',
+                            style: TextStyle(color: Colors.white, fontSize: 14)),
+                        value: agreed,
+                        onChanged: (v) => setSB(() => agreed = v ?? false),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        activeColor: _TripsPageState._accent,
+                        checkColor: _TripsPageState._bg,
+                      );
+                    }),
                   ],
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(
-                    'Cancel',
-                    style: GoogleFonts.poppins(color: Colors.white70),
-                  ),
+                  child: Text('Cancel',
+                      style: GoogleFonts.poppins(color: Colors.white70)),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -749,12 +680,9 @@ class _BookingPageState extends State<_BookingPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _TripsPageState._accent,
-                  ),
-                  child: Text(
-                    'Confirm & Pay',
-                    style: GoogleFonts.poppins(color: _TripsPageState._bg),
-                  ),
+                      backgroundColor: _TripsPageState._accent),
+                  child: Text('Confirm & Pay',
+                      style: GoogleFonts.poppins(color: _TripsPageState._bg)),
                 ),
               ],
             );
@@ -775,13 +703,15 @@ class _BookingPageState extends State<_BookingPage> {
   }
 }
 
-// --- REUSABLE FORM WIDGET ---
-
+// This widget represents the multi-step form for creating or editing a booking.
 class _BookingForm extends StatefulWidget {
   final Booking booking;
   final VoidCallback onUpdate;
 
-  const _BookingForm({required this.booking, required this.onUpdate});
+  const _BookingForm({
+    required this.booking,
+    required this.onUpdate,
+  });
 
   @override
   State<_BookingForm> createState() => _BookingFormState();
@@ -820,29 +750,24 @@ class _BookingFormState extends State<_BookingForm> {
                     return const Iterable<String>.empty();
                   }
                   final query = textEditingValue.text.toLowerCase();
-                  return _TripsPageState.destinationPrices.keys.where(
-                    (name) => name.toLowerCase().contains(query),
-                  );
+                  return _TripsPageState.destinationPrices.keys
+                      .where((name) => name.toLowerCase().contains(query));
                 },
                 onSelected: (val) => _setPackageAndPrice(val),
                 fieldViewBuilder:
                     (context, controller, focusNode, onFieldSubmitted) {
-                      if (controller.text != b.packageName) {
-                        controller.text = b.packageName;
-                      }
-                      return TextFormField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        decoration: _pillDecoration(
-                          'Package / Destination Name',
-                        ),
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                        onChanged: (v) => _setPackageAndPrice(v),
-                      );
-                    },
+                  if (controller.text != b.packageName) {
+                    controller.text = b.packageName;
+                  }
+                  return TextFormField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    decoration:
+                        _pillDecoration('Package / Destination Name'),
+                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
+                    onChanged: (v) => _setPackageAndPrice(v),
+                  );
+                },
               ),
               const SizedBox(height: 8),
               Text(
@@ -853,7 +778,8 @@ class _BookingFormState extends State<_BookingForm> {
           ),
         ),
         _SectionCard(
-          header: _stepLabel(2, 'Booking Dates', Icons.calendar_month_outlined),
+          header:
+              _stepLabel(2, 'Booking Dates', Icons.calendar_month_outlined),
           child: Row(
             children: [
               Expanded(
@@ -865,10 +791,9 @@ class _BookingFormState extends State<_BookingForm> {
                     suffixIcon: const Icon(Icons.calendar_today),
                   ),
                   controller: TextEditingController(
-                    text: b.startDate != null
-                        ? _TripsPageState._fmt(b.startDate!)
-                        : '',
-                  ),
+                      text: b.startDate != null
+                          ? _TripsPageState._fmt(b.startDate!)
+                          : ''),
                 ),
               ),
               const SizedBox(width: 10),
@@ -881,10 +806,9 @@ class _BookingFormState extends State<_BookingForm> {
                     suffixIcon: const Icon(Icons.calendar_today),
                   ),
                   controller: TextEditingController(
-                    text: b.endDate != null
-                        ? _TripsPageState._fmt(b.endDate!)
-                        : '',
-                  ),
+                      text: b.endDate != null
+                          ? _TripsPageState._fmt(b.endDate!)
+                          : ''),
                 ),
               ),
             ],
@@ -895,21 +819,16 @@ class _BookingFormState extends State<_BookingForm> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _circleIconButton(
-                Icons.remove,
-                onPressed: () {
-                  if (b.participants.length > 1) {
-                    setState(() => b.participants.removeLast());
-                    widget.onUpdate();
-                  }
-                },
-              ),
+              _circleIconButton(Icons.remove, onPressed: () {
+                if (b.participants.length > 1) {
+                  setState(() => b.participants.removeLast());
+                  widget.onUpdate();
+                }
+              }),
               const SizedBox(width: 16),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
                   color: _TripsPageState._accent,
                   borderRadius: BorderRadius.circular(20),
@@ -917,34 +836,26 @@ class _BookingFormState extends State<_BookingForm> {
                 child: Text(
                   '${b.participants.length}',
                   style: GoogleFonts.poppins(
-                    color: _TripsPageState._bg,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                      color: _TripsPageState._bg,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
                 ),
               ),
               const SizedBox(width: 16),
-              _circleIconButton(
-                Icons.add,
-                onPressed: () {
-                  setState(() => b.participants.add(Participant()));
-                  widget.onUpdate();
-                },
-              ),
+              _circleIconButton(Icons.add, onPressed: () {
+                setState(() => b.participants.add(Participant()));
+                widget.onUpdate();
+              }),
             ],
           ),
         ),
         _SectionCard(
-          header: _stepLabel(
-            4,
-            'Participant Information',
-            Icons.badge_outlined,
-          ),
+          header:
+              _stepLabel(4, 'Participant Information', Icons.badge_outlined),
           child: Column(
             children: List.generate(
               b.participants.length,
-              (i) =>
-                  _buildParticipant(i, isLast: i == b.participants.length - 1),
+              (i) => _buildParticipant(i, isLast: i == b.participants.length - 1),
             ),
           ),
         ),
@@ -1005,7 +916,8 @@ class _BookingFormState extends State<_BookingForm> {
             children: [
               SizedBox(
                 width: 100,
-                child: _AgePicker(value: p.age, onChanged: (v) => p.age = v),
+                child: _AgePicker(
+                    value: p.age, onChanged: (v) => p.age = v),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1053,8 +965,6 @@ class _BookingFormState extends State<_BookingForm> {
     }
   }
 
-  // --- REUSABLE UI HELPERS FOR THE FORM ---
-
   Widget _circleIconButton(IconData icon, {required VoidCallback onPressed}) {
     return Ink(
       decoration: ShapeDecoration(
@@ -1093,9 +1003,7 @@ class _BookingFormState extends State<_BookingForm> {
           child: Text(
             '$number',
             style: GoogleFonts.poppins(
-              color: _TripsPageState._bg,
-              fontWeight: FontWeight.bold,
-            ),
+                color: _TripsPageState._bg, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(width: 10),
@@ -1104,16 +1012,12 @@ class _BookingFormState extends State<_BookingForm> {
         Text(
           title.toUpperCase(),
           style: GoogleFonts.poppins(
-            color: _TripsPageState._primary,
-            fontWeight: FontWeight.w700,
-          ),
+              color: _TripsPageState._primary, fontWeight: FontWeight.w700),
         ),
       ],
     );
   }
 }
-
-// --- CUSTOM AGE PICKER WIDGET ---
 
 class _AgePicker extends StatefulWidget {
   final int value;
@@ -1148,10 +1052,9 @@ class _AgePickerState extends State<_AgePicker> {
       },
       textStyle: GoogleFonts.poppins(color: Colors.white54, fontSize: 14),
       selectedTextStyle: GoogleFonts.poppins(
-        color: _TripsPageState._accent,
-        fontWeight: FontWeight.bold,
-        fontSize: 18,
-      ),
+          color: _TripsPageState._accent,
+          fontWeight: FontWeight.bold,
+          fontSize: 18),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.white12),
         borderRadius: BorderRadius.circular(12),
@@ -1159,8 +1062,6 @@ class _AgePickerState extends State<_AgePicker> {
     );
   }
 }
-
-// --- REUSABLE SECTION CARD WIDGET ---
 
 class _SectionCard extends StatelessWidget {
   final Widget header;
@@ -1177,10 +1078,9 @@ class _SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: const Offset(0, 6),
-          ),
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: const Offset(0, 6)),
         ],
       ),
       child: Column(

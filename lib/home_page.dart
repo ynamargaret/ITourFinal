@@ -9,7 +9,8 @@ import 'profile.dart';
 import 'trips_page.dart';
 import 'destination.dart';
 
-// ====== MAIN PAGE CONTENT ======
+// The HomePage is a StatefulWidget because its content needs to change based on
+// user interactions, such as searching or fetching live weather data.
 class HomePage extends StatefulWidget {
   final List<Destination> favorites;
   final Function(List<Destination>) onFavoritesChanged;
@@ -237,23 +238,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _syncFavorites() {
-    // Sync destination favorite states with the shared favorites list
     for (var destination in destinations) {
-      destination.isFavorite = widget.favorites.any(
-        (fav) => fav.title == destination.title,
-      );
+      destination.isFavorite =
+          widget.favorites.any((fav) => fav.title == destination.title);
     }
   }
 
+  // This function is called when the user taps the heart icon.
+  // It uses a callback (onFavoritesChanged) to pass the updated list
+  // of favorites up to the parent widget (main_tabs.dart).
   void _toggleFavorite(Destination d) {
     setState(() {
       d.isFavorite = !d.isFavorite;
     });
 
-    // Update the shared favorites list
-    List<Destination> updatedFavorites = destinations
-        .where((dest) => dest.isFavorite)
-        .toList();
+    List<Destination> updatedFavorites =
+        destinations.where((dest) => dest.isFavorite).toList();
     widget.onFavoritesChanged(updatedFavorites);
   }
 
@@ -261,7 +261,6 @@ class _HomePageState extends State<HomePage> {
     final proceed = await _showBookingConfirmationDialog();
     if (!proceed) return;
 
-    // Navigate to TripsPage with pre-filled destination
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -293,10 +292,8 @@ class _HomePageState extends State<HomePage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'Cancel',
-                  style: GoogleFonts.poppins(color: Colors.white70),
-                ),
+                child: Text('Cancel',
+                    style: GoogleFonts.poppins(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -306,10 +303,8 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text(
-                  'Proceed',
-                  style: GoogleFonts.poppins(color: Colors.white),
-                ),
+                child: Text('Proceed',
+                    style: GoogleFonts.poppins(color: Colors.white)),
               ),
             ],
           ),
@@ -317,6 +312,7 @@ class _HomePageState extends State<HomePage> {
         false;
   }
 
+  // This function iterates through all destinations and fetches their weather data.
   Future<void> _fetchAllWeathers() async {
     for (var d in destinations) {
       final weather = await _fetchWeather(d.city);
@@ -330,6 +326,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Fetches live weather data from the OpenWeatherMap API using an async HTTP GET request.
+  // The 'http' package is used to handle the network call.
   Future<Map<String, dynamic>> _fetchWeather(String city) async {
     try {
       final uri = Uri.https('api.openweathermap.org', '/data/2.5/weather', {
@@ -367,7 +365,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // ====== CARD BUILDER ======
+  // This widget builds the UI for a single destination card.
   Widget _buildDestinationCard(Destination d) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -375,28 +373,21 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           color: const Color(0xFF19183B),
           borderRadius: BorderRadius.circular(20),
-          // --- MODIFICATION FOR GLOW EFFECT ---
+          // The BoxShadow creates the glowing effect around the card for a modern UI.
           boxShadow: [
             BoxShadow(
-              color: const Color.fromARGB(
-                255,
-                255,
-                255,
-                255,
-              ).withOpacity(0.4), // Color of the glow
-              blurRadius: 20, // How diffused the glow is
-              spreadRadius: 1, // How far the glow extends
-              offset: const Offset(0, 0), // Centered glow from all sides
+              color: Colors.blueAccent.withOpacity(0.4),
+              blurRadius: 20,
+              spreadRadius: 1,
+              offset: const Offset(0, 0),
             ),
           ],
-          // --- END MODIFICATION ---
         ),
         child: Padding(
           padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title + Weather
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -429,8 +420,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               const SizedBox(height: 8),
-
-              // City + Country flag
               Row(
                 children: [
                   CountryFlag.fromCountryCode(
@@ -448,14 +437,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
               Text(
                 d.description,
                 style: GoogleFonts.poppins(color: Colors.white70, fontSize: 13),
               ),
               const SizedBox(height: 8),
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: d.inclusions
@@ -473,7 +460,6 @@ class _HomePageState extends State<HomePage> {
                     )
                     .toList(),
               ),
-
               const SizedBox(height: 8),
               Text(
                 d.price,
@@ -482,16 +468,12 @@ class _HomePageState extends State<HomePage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 12),
               ClipRRect(
                 borderRadius: BorderRadius.circular(14),
                 child: ImageCarousel(images: d.images),
               ),
-
               const SizedBox(height: 14),
-
-              // Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -589,7 +571,6 @@ class _HomePageState extends State<HomePage> {
         child: ListView(
           padding: const EdgeInsets.only(top: 12, bottom: 20),
           children: [
-            // Search bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(

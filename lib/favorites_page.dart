@@ -5,7 +5,8 @@ import 'package:country_flags/country_flags.dart';
 import 'destination.dart';
 import 'widgets/image_carousel.dart';
 
-// Convert to a StatefulWidget to manage the selected item's state
+// This page is a StatefulWidget to manage which view is currently active:
+// the simple list view, or the detailed card view for a selected favorite.
 class FavoritesPage extends StatefulWidget {
   final List<Destination> favorites;
   final Function(Destination) onFavoriteRemoved;
@@ -21,10 +22,10 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
-  // This will hold the destination the user taps on to see details
+  // This state variable holds the destination the user taps on.
+  // If it's null, we show the list. If it has a value, we show the detail card.
   Destination? _selectedFavorite;
 
-  // Helper function to get the correct weather icon
   IconData _getWeatherIcon(String? main) {
     switch (main) {
       case "Clear":
@@ -49,7 +50,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
         backgroundColor: const Color(0xFF19183B),
         elevation: 0,
         title: Text(
-          // Show different titles based on the view
           _selectedFavorite == null ? 'Favorites' : 'Details',
           style: GoogleFonts.poppins(
             color: Colors.white,
@@ -58,14 +58,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
           ),
         ),
       ),
-      // Conditionally show either the list or the detailed view
+      // This is a conditional build: it shows the detailed card if a favorite
+      // is selected, otherwise it defaults to showing the main list.
       body: _selectedFavorite == null
           ? _buildFavoritesList()
           : _buildDetailedCard(_selectedFavorite!),
     );
   }
 
-  // --- WIDGET FOR THE INITIAL LIST OF FAVORITES ---
+  // Builds the initial list of all favorite items.
   Widget _buildFavoritesList() {
     if (widget.favorites.isEmpty) {
       return Center(
@@ -74,20 +75,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.favorite_border,
-                size: 80,
-                color: Colors.white.withOpacity(0.3),
-              ),
+              Icon(Icons.favorite_border,
+                  size: 80, color: Colors.white.withOpacity(0.3)),
               const SizedBox(height: 16),
-              Text(
-                'No favorites yet',
-                style: GoogleFonts.poppins(
-                  color: Colors.white70,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text('No favorites yet',
+                  style: GoogleFonts.poppins(
+                      color: Colors.white70,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               Text(
                 'Tap the heart icon to add destinations to your favorites',
@@ -110,12 +105,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // --- WIDGET FOR A SINGLE ITEM IN THE SIMPLE LIST ---
+  // Builds a single, compact card for the list view.
   Widget _buildSimpleFavoriteCard(Destination d) {
     return InkWell(
       onTap: () {
+        // When tapped, we update the state to show the detailed view for this item.
         setState(() {
-          _selectedFavorite = d; // Set the selected favorite to show details
+          _selectedFavorite = d;
         });
       },
       borderRadius: BorderRadius.circular(20),
@@ -131,35 +127,25 @@ class _FavoritesPageState extends State<FavoritesPage> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                d.images.first,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset(d.images.first,
+                  width: 80, height: 80, fit: BoxFit.cover),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    d.title,
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text(d.title,
+                      style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  Text(
-                    '${d.city}, ${d.country}',
-                    style: GoogleFonts.poppins(
-                      color: Colors.blue[200],
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  Text('${d.city}, ${d.country}',
+                      style: GoogleFonts.poppins(
+                          color: Colors.blue[200],
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
@@ -174,7 +160,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // --- WIDGET FOR THE DETAILED GLOWING CARD VIEW ---
+  // Builds the detailed, glowing card that appears after a user taps an item.
   Widget _buildDetailedCard(Destination d) {
     return SingleChildScrollView(
       child: Padding(
@@ -185,10 +171,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.blueAccent.withOpacity(0.4),
-                blurRadius: 20,
-                spreadRadius: 1,
-              ),
+                  color: Colors.blueAccent.withOpacity(0.4),
+                  blurRadius: 20,
+                  spreadRadius: 1),
             ],
           ),
           child: Padding(
@@ -196,109 +181,74 @@ class _FavoritesPageState extends State<FavoritesPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title and Weather
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        d.title.toUpperCase(),
-                        style: GoogleFonts.poppins(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
-                      ),
-                    ),
+                        child: Text(d.title.toUpperCase(),
+                            style: GoogleFonts.poppins(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                height: 1.2))),
                     const SizedBox(width: 16),
                     Column(
                       children: [
-                        Icon(
-                          _getWeatherIcon(d.weatherMain),
-                          color: Colors.white,
-                          size: 32,
-                        ),
+                        Icon(_getWeatherIcon(d.weatherMain),
+                            color: Colors.white, size: 32),
                         const SizedBox(height: 4),
                         Text(
-                          d.temperatureC != null
-                              ? "${d.temperatureC!.toStringAsFixed(1)}°C"
-                              : "--°C",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white70,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                            d.temperatureC != null
+                                ? "${d.temperatureC!.toStringAsFixed(1)}°C"
+                                : "--°C",
+                            style: GoogleFonts.poppins(
+                                color: Colors.white70,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                // City + Country flag
                 Row(
                   children: [
-                    CountryFlag.fromCountryCode(
-                      d.countryCode,
-                      height: 22,
-                      width: 30,
-                      borderRadius: 4,
-                    ),
+                    CountryFlag.fromCountryCode(d.countryCode,
+                        height: 22, width: 30, borderRadius: 4),
                     const SizedBox(width: 10),
-                    Text(
-                      "${d.city}, ${d.country}",
-                      style: GoogleFonts.poppins(
-                        color: Colors.blue[100],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
+                    Text("${d.city}, ${d.country}",
+                        style: GoogleFonts.poppins(
+                            color: Colors.blue[100],
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16)),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  d.description,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                ),
+                Text(d.description,
+                    style: GoogleFonts.poppins(
+                        color: Colors.white70, fontSize: 14, height: 1.5)),
                 const SizedBox(height: 12),
-                // Inclusions
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: d.inclusions
-                      .map(
-                        (inc) => Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                            "• $inc",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      )
+                      .map((inc) => Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Text("• $inc",
+                                style: GoogleFonts.poppins(
+                                    color: Colors.white70, fontSize: 14)),
+                          ))
                       .toList(),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  d.price,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
+                Text(d.price,
+                    style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18)),
                 const SizedBox(height: 16),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: ImageCarousel(images: d.images),
-                ),
+                    borderRadius: BorderRadius.circular(14),
+                    child: ImageCarousel(images: d.images)),
                 const SizedBox(height: 14),
-                // Back Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -306,16 +256,16 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
+                          color: Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle),
                       child: IconButton(
                         tooltip: "Back to Favorites List",
                         icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () {
+                          // This clears the selection, causing the UI to rebuild
+                          // back to the simple list view.
                           setState(() {
-                            _selectedFavorite =
-                                null; // Clear selection to go back
+                            _selectedFavorite = null;
                           });
                         },
                       ),

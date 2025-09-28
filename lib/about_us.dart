@@ -5,16 +5,14 @@ class AboutUsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This Container acts as the new root widget to hold the background image.
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage("assets/img/page_blur_bg.png"),
-          fit: BoxFit.cover, // Ensures the image covers the entire screen
+          fit: BoxFit.cover,
         ),
       ),
       child: Scaffold(
-        // The Scaffold's background is made transparent to show the image behind it.
         backgroundColor: Colors.transparent,
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -46,8 +44,6 @@ class AboutUsPage extends StatelessWidget {
                 style: TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 30),
-
-              // Team members
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,14 +99,11 @@ class _TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This Container wraps the card content to provide the background and glow.
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        // A semi-transparent background color for the card itself.
         color: Colors.black.withOpacity(0.25),
         borderRadius: BorderRadius.circular(16),
-        // The boxShadow creates the glowing effect.
         boxShadow: [
           BoxShadow(
             color: Colors.lightBlueAccent.withOpacity(0.5),
