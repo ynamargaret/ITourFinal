@@ -1,0 +1,62 @@
+name: test
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+  google_fonts: ^6.1.0
+  country_flags: ^2.2.0
+  badges: ^3.1.2
+  cupertino_icons: ^1.0.8
+  numberpicker: ^2.1.2
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/img/
+    - assets/img/login_bg.png
+    - assets/img/itour_logo.png
+    - assets/img/great_wall1.png
+    - assets/img/great_wall2.png
+    - assets/img/great_wall3.png
+    - assets/img/machu1.png
+    - assets/img/machu2.png
+    - assets/img/machu3.png
+    - assets/img/petra1.jpg
+    - assets/img/petra2.jpg
+    - assets/img/petra3.jpg
+    # - assets/img/rome1.png
+    # - assets/img/rome2.png
+    # - assets/img/rome3.png
+    # - assets/img/chichen1.png
+    # - assets/img/chichen2.png
+    # - assets/img/chichen3.png
+    # - assets/img/rio1.png
+    # - assets/img/rio2.png
+    # - assets/img/rio3.png
+    # - assets/img/taj1.png
+    # - assets/img/taj2.png
+    # - assets/img/taj3.png
+    # - assets/img/stonehenge1.png
+    # - assets/img/stonehenge2.png
+    # - assets/img/stonehenge3.png
+    # - assets/img/northern1.png
+    # - assets/img/northern2.png
+    # - assets/img/northern3.png
+    # - assets/img/giza1.png
+    # - assets/img/giza2.png
+    # - assets/img/giza3.png
