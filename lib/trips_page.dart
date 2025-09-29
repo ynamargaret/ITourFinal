@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:numberpicker/numberpicker.dart';
 
+// --- DATA MODELS ---
+
 class Participant {
   String firstName;
   String lastName;
@@ -59,9 +61,11 @@ class Booking {
   );
 }
 
+// --- MAIN TRIPS PAGE WIDGET ---
+
 class TripsPage extends StatefulWidget {
   final String? prefilledDestination;
-  
+
   const TripsPage({super.key, this.prefilledDestination});
   @override
   State<TripsPage> createState() => _TripsPageState();
@@ -71,6 +75,7 @@ class _TripsPageState extends State<TripsPage> {
   static final List<Booking> _bookings = [];
   DateTime? _lastWarnAt;
 
+  // --- UI COLORS & STYLES ---
   static const Color _bg = Color(0xFF19183B);
   static const Color _secondary = Color(0xFF708993);
   static const Color _accent = Color(0xFFA1C2BD);
@@ -90,24 +95,6 @@ class _TripsPageState extends State<TripsPage> {
     'Pyramids of Giza Discovery': 1750,
   };
 
-  void _showWarn(BuildContext context, String message) {
-    final now = DateTime.now();
-    if (_lastWarnAt != null &&
-        now.difference(_lastWarnAt!) < Duration(milliseconds: 900))
-      return;
-    _lastWarnAt = now;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.fromLTRB(16, 0, 16, 90),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -124,23 +111,17 @@ class _TripsPageState extends State<TripsPage> {
     return Scaffold(
       backgroundColor: _bg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: _bg,
         elevation: 0,
         title: Text(
-          'Trips',
+          'Your Bookings',
           style: GoogleFonts.poppins(
             color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: _accent),
-            onPressed: () => _openBookingForm(),
-            tooltip: 'Create booking',
-          ),
-        ],
       ),
       body: Stack(
         fit: StackFit.expand,
@@ -150,78 +131,12 @@ class _TripsPageState extends State<TripsPage> {
             child: Image.asset('assets/img/page_bg.png', fit: BoxFit.cover),
           ),
           _bookings.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.card_travel, size: 64, color: _secondary),
-                      SizedBox(height: 16),
-                      Text(
-                        'No bookings yet. Tap + to create one.',
-                        style: TextStyle(color: _secondary, fontSize: 16),
-                      ),
-                    ],
-                  ),
-                )
+              ? _buildEmptyState()
               : ListView.builder(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   itemCount: _bookings.length,
                   itemBuilder: (context, index) {
-                    final b = _bookings[index];
-                    final dates = (b.startDate != null && b.endDate != null)
-                        ? '${_fmt(b.startDate!)} → ${_fmt(b.endDate!)}'
-                        : 'Dates not set';
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 14),
-                      decoration: BoxDecoration(
-                        color: _card,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: _accent.withOpacity(0.3)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        title: Text(
-                          b.packageName.isEmpty
-                              ? 'Package not set'
-                              : b.packageName,
-                          style: TextStyle(
-                            color: _primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        subtitle: Padding(
-                          padding: EdgeInsets.only(top: 6.0),
-                          child: Text(
-                            '$dates\n${b.participants.length} traveler(s) • ${b.paymentMethod} • ${b.perPersonPrice} PHP / person',
-                            style: TextStyle(color: _secondary, height: 1.2),
-                          ),
-                        ),
-                        isThreeLine: true,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit, color: _accent),
-                              onPressed: () =>
-                                  _openBookingForm(editIndex: index),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.redAccent),
-                              onPressed: () => _confirmDelete(index),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                    return _buildBookingCard(_bookings[index], index);
                   },
                 ),
         ],
@@ -229,26 +144,172 @@ class _TripsPageState extends State<TripsPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: _accent,
         onPressed: () => _openBookingForm(),
-        child: Icon(Icons.add, color: _bg),
+        tooltip: 'Create new booking',
+        child: const Icon(Icons.add, color: _bg, size: 28),
       ),
     );
   }
 
+  // --- UI BUILDER WIDGETS ---
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.luggage_outlined, size: 80, color: _secondary),
+          const SizedBox(height: 20),
+          Text(
+            'Your Adventures Await!',
+            style: GoogleFonts.poppins(
+              color: _primary,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tap the \'+\' button to book your next journey.',
+            style: GoogleFonts.poppins(color: _secondary, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBookingCard(Booking b, int index) {
+    final dates = (b.startDate != null && b.endDate != null)
+        ? '${_fmt(b.startDate!)} → ${_fmt(b.endDate!)}'
+        : 'Dates not set';
+    final total = b.perPersonPrice * b.participants.length;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blueAccent.withOpacity(0.3),
+            blurRadius: 15,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    b.packageName.isEmpty ? 'Package Not Set' : b.packageName,
+                    style: GoogleFonts.poppins(
+                      color: _primary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    _circleButton(
+                      Icons.edit,
+                      _accent,
+                      () => _openBookingForm(editIndex: index),
+                    ),
+                    const SizedBox(width: 8),
+                    _circleButton(
+                      Icons.delete,
+                      Colors.redAccent,
+                      () => _confirmDelete(index),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const Divider(color: _secondary, height: 24),
+            _infoRow(Icons.calendar_today, dates),
+            const SizedBox(height: 8),
+            _infoRow(Icons.people, '${b.participants.length} Traveler(s)'),
+            const SizedBox(height: 8),
+            _infoRow(
+              Icons.payment,
+              '${b.paymentMethod} • PHP ${b.perPersonPrice} / person',
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Total: PHP $total',
+                style: GoogleFonts.poppins(
+                  color: _primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: _secondary, size: 16),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(color: _secondary, fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _circleButton(IconData icon, Color color, VoidCallback onPressed) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.15),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
+
+  // --- LOGIC & NAVIGATION ---
+
   Future<void> _openBookingForm({int? editIndex}) async {
     final isEditing = editIndex != null;
     final isFromHomePage = widget.prefilledDestination != null && !isEditing;
-    
+
     if (!isEditing && !isFromHomePage) {
       final proceed = await _showBookingConfirmationDialog();
       if (!proceed) return;
     }
-    final Booking working = isEditing ? _bookings[editIndex].copy() : Booking();
-    
-    // Pre-fill destination if provided
+
+    final Booking working = isEditing
+        ? _bookings[editIndex!].copy()
+        : Booking();
+
     if (widget.prefilledDestination != null && !isEditing) {
       working.packageName = widget.prefilledDestination!;
-      working.perPersonPrice = destinationPrices[widget.prefilledDestination!] ?? 1000;
+      working.perPersonPrice =
+          destinationPrices[widget.prefilledDestination!] ?? 1000;
     }
+
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -266,9 +327,9 @@ class _TripsPageState extends State<TripsPage> {
                 _bookings.add(savedBooking);
               }
             });
-            Navigator.pop(context);
+            Navigator.pop(context); // Close the booking form
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text('Payment Successful / Booking Confirmed'),
                 backgroundColor: Colors.green,
               ),
@@ -290,19 +351,22 @@ class _TripsPageState extends State<TripsPage> {
             ),
             title: Text(
               'Start Booking Session',
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
             content: Text(
-              'Are you sure you want to start a new booking? You have 10 minutes to complete your booking or it will expire.',
-              style: TextStyle(color: Colors.white70),
+              'You have 10 minutes to complete your booking or it will expire.',
+              style: GoogleFonts.poppins(color: Colors.white70),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins(color: Colors.white70),
+                ),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -312,7 +376,10 @@ class _TripsPageState extends State<TripsPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Proceed', style: TextStyle(color: Colors.white)),
+                child: Text(
+                  'Proceed',
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -320,33 +387,37 @@ class _TripsPageState extends State<TripsPage> {
         false;
   }
 
-  static bool _isBookingComplete(Booking b) {
-    if (b.packageName.trim().isEmpty) return false;
-    if (b.startDate == null || b.endDate == null) return false;
-    if (b.contactInfo.trim().isEmpty) return false;
-    if (b.participants.isEmpty) return false;
-    for (final p in b.participants) {
-      if (p.firstName.trim().isEmpty || p.lastName.trim().isEmpty) return false;
-    }
-    if (b.paymentMethod.trim().isEmpty) return false;
-    return true;
-  }
-
   Future<void> _confirmDelete(int index) async {
     final ok =
         await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Cancel Booking?'),
-            content: Text('This will delete the booking.'),
+            backgroundColor: _card,
+            title: Text(
+              'Cancel Booking?',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+            content: Text(
+              'This will permanently delete the booking.',
+              style: GoogleFonts.poppins(color: Colors.white70),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('No'),
+                child: Text(
+                  'No',
+                  style: GoogleFonts.poppins(color: Colors.white70),
+                ),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text('Yes'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                ),
+                child: Text(
+                  'Yes, Cancel',
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -358,6 +429,9 @@ class _TripsPageState extends State<TripsPage> {
   static String _fmt(DateTime d) => '${d.month}/${d.day}/${d.year}';
 }
 
+// --- BOOKING FORM PAGE WIDGET ---
+// (This remains a separate page for clarity)
+
 class _BookingPage extends StatefulWidget {
   final Booking booking;
   final bool isEditing;
@@ -365,7 +439,6 @@ class _BookingPage extends StatefulWidget {
   final Function(Booking) onSave;
 
   const _BookingPage({
-    super.key,
     required this.booking,
     required this.isEditing,
     this.editIndex,
@@ -395,48 +468,17 @@ class _BookingPageState extends State<_BookingPage> {
   }
 
   void _startSessionTimer() {
-    _sessionTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() => _timeRemaining--);
-      if (_timeRemaining <= 0) {
-        _sessionTimer?.cancel();
-        _showSessionExpiredDialog();
+    _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() => _timeRemaining--);
+        if (_timeRemaining <= 0) {
+          _sessionTimer?.cancel();
+          _showSessionExpiredDialog();
+        }
+      } else {
+        timer.cancel();
       }
     });
-  }
-
-  void _showSessionExpiredDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: _TripsPageState._card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Session Expired',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'Your booking session has expired. Please start a new booking session.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _TripsPageState._accent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text('OK', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
   }
 
   String _formatTime(int seconds) {
@@ -447,19 +489,6 @@ class _BookingPageState extends State<_BookingPage> {
 
   void updateBooking() => setState(() {});
 
-  void _showWarn(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.fromLTRB(16, 0, 16, 90),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -469,11 +498,17 @@ class _BookingPageState extends State<_BookingPage> {
         elevation: 0,
         title: Row(
           children: [
-            Text('Confirm your Booking', style: TextStyle(color: Colors.white)),
+            Text(
+              'Confirm your Booking',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
             if (!widget.isEditing) ...[
-              Spacer(),
+              const Spacer(),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _timeRemaining <= 30
                       ? Colors.red
@@ -482,10 +517,9 @@ class _BookingPageState extends State<_BookingPage> {
                 ),
                 child: Text(
                   _formatTime(_timeRemaining),
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
                   ),
                 ),
               ),
@@ -493,132 +527,144 @@ class _BookingPageState extends State<_BookingPage> {
           ],
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () {
             _sessionTimer?.cancel();
-            // Go back to main tabs (home page)
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            Navigator.of(context).pop();
           },
         ),
       ),
-      body: Stack(
-        fit: StackFit.expand,
+      body: Column(
         children: [
-          Opacity(
-            opacity: 0.06,
-            child: Image.asset('assets/img/page_bg.png', fit: BoxFit.cover),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: _BookingForm(booking: b, onUpdate: updateBooking),
+            ),
           ),
-          Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(16),
-                  child: _BookingForm(
-                    booking: b,
-                    onUpdate: updateBooking,
-                    onSubmit: () async {
-                      if (!_TripsPageState._isBookingComplete(b)) {
-                        _showWarn('Please fill out all information.');
-                        return;
-                      }
-                      final confirmed = await _showConfirmDialog(b);
-                      if (confirmed) {
-                        _sessionTimer?.cancel();
-                        widget.onSave(b);
-                      }
-                    },
+          _buildBottomBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      decoration: BoxDecoration(
+        color: _TripsPageState._card,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 12,
+            offset: const Offset(0, -4),
+          ),
+        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'TOTAL',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white54,
+                    fontSize: 12,
                   ),
                 ),
-              ),
-              Container(
-                padding: EdgeInsets.fromLTRB(16, 10, 16, 16),
-                decoration: BoxDecoration(
-                  color: Color(0xFF121540),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black38,
-                      blurRadius: 12,
-                      offset: Offset(0, -4),
-                    ),
-                  ],
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                Text(
+                  'PHP ${b.participants.length * b.perPersonPrice}',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'TOTAL',
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            '${b.participants.length * b.perPersonPrice} PHP',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Text(
-                            '${b.perPersonPrice} PHP / person',
-                            style: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (!_TripsPageState._isBookingComplete(b)) {
-                          _showWarn('Please fill out all information.');
-                          return;
-                        }
-                        final confirmed = await _showConfirmDialog(b);
-                        if (confirmed) {
-                          _sessionTimer?.cancel();
-                          widget.onSave(b);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        shape: StadiumBorder(),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 26,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: Text('SUBMIT'),
-                    ),
-                    SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        _sessionTimer?.cancel();
-                        Navigator.of(context).popUntil((route) => route.isFirst);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFB54857),
-                        foregroundColor: Colors.white,
-                        shape: StadiumBorder(),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 22,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: Text('CANCEL'),
-                    ),
-                  ],
+                Text(
+                  'PHP ${b.perPersonPrice} / person',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white38,
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (!_isBookingComplete(b)) {
+                _showWarn('Please fill out all required fields.');
+                return;
+              }
+              final confirmed = await _showConfirmDialog(b);
+              if (confirmed && mounted) {
+                _sessionTimer?.cancel();
+                widget.onSave(b);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+            ),
+            child: Text(
+              'SUBMIT',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- DIALOGS AND VALIDATION ---
+
+  void _showWarn(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.poppins()),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 90),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _showSessionExpiredDialog() {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: _TripsPageState._card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Session Expired',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Your booking session has expired. Please start over.',
+          style: GoogleFonts.poppins(color: Colors.white70),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Close booking page
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _TripsPageState._accent,
+            ),
+            child: Text('OK', style: GoogleFonts.poppins(color: Colors.white)),
           ),
         ],
       ),
@@ -632,59 +678,56 @@ class _BookingPageState extends State<_BookingPage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text('Confirm Your Booking'),
+              backgroundColor: _TripsPageState._card,
+              title: Text(
+                'Confirm Your Booking',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               content: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: ListBody(
                   children: [
                     Text(
-                      'Trip Details: ${b.packageName.isEmpty ? 'Not specified' : b.packageName}',
+                      'Package: ${b.packageName}',
+                      style: GoogleFonts.poppins(color: Colors.white70),
                     ),
                     Text(
-                      'Travel Dates: ${b.startDate != null ? _TripsPageState._fmt(b.startDate!) : 'N/A'} – ${b.endDate != null ? _TripsPageState._fmt(b.endDate!) : 'N/A'}',
+                      'Dates: ${_TripsPageState._fmt(b.startDate!)} – ${_TripsPageState._fmt(b.endDate!)}',
+                      style: GoogleFonts.poppins(color: Colors.white70),
                     ),
+                    const SizedBox(height: 12),
                     Text(
-                      'Price per person: ${b.perPersonPrice} PHP',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      'Total Price: PHP $total',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
+                    const Divider(height: 24),
                     Text(
-                      'Total Price: $total PHP',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      'By booking, you consent to your information being used for reservation purposes, in compliance with the Data Privacy Act of 2012 (RA 10173).',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                     ),
-                    SizedBox(height: 12),
-                    Text(
-                      'Timer / Constraint Message',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Please complete your confirmation and payment within 10 minutes to lock in this rate.',
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      'Agreement Section',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'By booking, you consent to the travel agency collecting, using, and sharing your contact and personal information with airlines, hotels, and service partners solely for reservation and communication. We protect data in full compliance with the Philippine Data Privacy Act of 2012 (RA 10173).',
-                    ),
-                    Row(
-                      children: [
-                        StatefulBuilder(
-                          builder: (context, setSB) {
-                            return Checkbox(
-                              value: agreed,
-                              activeColor: _TripsPageState._accent,
-                              onChanged: (v) =>
-                                  setSB(() => agreed = v ?? false),
-                            );
-                          },
-                        ),
-                        Expanded(
-                          child: Text(
-                            'I agree to the Terms & Conditions and authorize payment of the total amount for this booking.',
+                    StatefulBuilder(
+                      builder: (context, setSB) {
+                        return CheckboxListTile(
+                          title: const Text(
+                            'I agree to the Terms & Conditions',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
-                        ),
-                      ],
+                          value: agreed,
+                          onChanged: (v) => setSB(() => agreed = v ?? false),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          contentPadding: EdgeInsets.zero,
+                          activeColor: _TripsPageState._accent,
+                          checkColor: _TripsPageState._bg,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -692,12 +735,14 @@ class _BookingPageState extends State<_BookingPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.poppins(color: Colors.white70),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     if (!agreed) {
-                      Navigator.of(context).pop(false);
                       _showWarn('Please agree to the terms to continue.');
                     } else {
                       Navigator.pop(context, true);
@@ -708,7 +753,7 @@ class _BookingPageState extends State<_BookingPage> {
                   ),
                   child: Text(
                     'Confirm & Pay',
-                    style: TextStyle(color: _TripsPageState._bg),
+                    style: GoogleFonts.poppins(color: _TripsPageState._bg),
                   ),
                 ),
               ],
@@ -717,19 +762,26 @@ class _BookingPageState extends State<_BookingPage> {
         ) ??
         false;
   }
+
+  bool _isBookingComplete(Booking b) {
+    if (b.packageName.trim().isEmpty) return false;
+    if (b.startDate == null || b.endDate == null) return false;
+    if (b.contactInfo.trim().isEmpty) return false;
+    if (b.participants.isEmpty) return false;
+    for (final p in b.participants) {
+      if (p.firstName.trim().isEmpty || p.lastName.trim().isEmpty) return false;
+    }
+    return true;
+  }
 }
+
+// --- REUSABLE FORM WIDGET ---
 
 class _BookingForm extends StatefulWidget {
   final Booking booking;
-  final VoidCallback onSubmit;
   final VoidCallback onUpdate;
 
-  const _BookingForm({
-    super.key,
-    required this.booking,
-    required this.onSubmit,
-    required this.onUpdate,
-  });
+  const _BookingForm({required this.booking, required this.onUpdate});
 
   @override
   State<_BookingForm> createState() => _BookingFormState();
@@ -744,66 +796,11 @@ class _BookingFormState extends State<_BookingForm> {
     b = widget.booking;
   }
 
-  InputDecoration _pillDecoration(
-    String hint, {
-    Widget? prefixIcon,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      filled: true,
-      fillColor: Colors.white,
-      prefixIcon: prefixIcon,
-      suffixIcon: suffixIcon,
-      isDense: true,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: _TripsPageState._accent.withOpacity(0.3)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: _TripsPageState._accent.withOpacity(0.2)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(14)),
-        borderSide: BorderSide(color: _TripsPageState._accent),
-      ),
-    );
-  }
-
-  Widget _stepLabel(int number, String title, IconData icon) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 14,
-          backgroundColor: _TripsPageState._accent,
-          child: Text(
-            '$number',
-            style: TextStyle(
-              color: _TripsPageState._bg,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        SizedBox(width: 10),
-        Icon(icon, color: _TripsPageState._accent, size: 18),
-        SizedBox(width: 6),
-        Text(
-          title.toUpperCase(),
-          style: TextStyle(
-            color: _TripsPageState._primary,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-
   void _setPackageAndPrice(String value) {
-    b.packageName = value;
-    b.perPersonPrice = _TripsPageState.destinationPrices[value] ?? 1000;
-    setState(() {});
+    setState(() {
+      b.packageName = value;
+      b.perPersonPrice = _TripsPageState.destinationPrices[value] ?? 1000;
+    });
     widget.onUpdate();
   }
 
@@ -819,8 +816,9 @@ class _BookingFormState extends State<_BookingForm> {
             children: [
               Autocomplete<String>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
-                  if (textEditingValue.text.isEmpty)
+                  if (textEditingValue.text.isEmpty) {
                     return const Iterable<String>.empty();
+                  }
                   final query = textEditingValue.text.toLowerCase();
                   return _TripsPageState.destinationPrices.keys.where(
                     (name) => name.toLowerCase().contains(query),
@@ -829,42 +827,42 @@ class _BookingFormState extends State<_BookingForm> {
                 onSelected: (val) => _setPackageAndPrice(val),
                 fieldViewBuilder:
                     (context, controller, focusNode, onFieldSubmitted) {
-                      if (controller.text != b.packageName)
+                      if (controller.text != b.packageName) {
                         controller.text = b.packageName;
-                      return TextField(
+                      }
+                      return TextFormField(
                         controller: controller,
                         focusNode: focusNode,
                         decoration: _pillDecoration(
                           'Package / Destination Name',
                         ),
-                        style: TextStyle(fontSize: 14, color: Colors.black),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                         onChanged: (v) => _setPackageAndPrice(v),
                       );
                     },
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                'Price per person: ${b.perPersonPrice} PHP',
-                style: TextStyle(color: Colors.white70),
+                'Price per person: PHP ${b.perPersonPrice}',
+                style: GoogleFonts.poppins(color: Colors.white70),
               ),
             ],
           ),
         ),
         _SectionCard(
-          header: _stepLabel(
-            2,
-            'Booking Date/s',
-            Icons.calendar_month_outlined,
-          ),
+          header: _stepLabel(2, 'Booking Dates', Icons.calendar_month_outlined),
           child: Row(
             children: [
               Expanded(
-                child: TextField(
+                child: TextFormField(
                   readOnly: true,
                   onTap: () => _pickDate(isStart: true),
                   decoration: _pillDecoration(
                     'Start Date',
-                    suffixIcon: Icon(Icons.calendar_today),
+                    suffixIcon: const Icon(Icons.calendar_today),
                   ),
                   controller: TextEditingController(
                     text: b.startDate != null
@@ -873,14 +871,14 @@ class _BookingFormState extends State<_BookingForm> {
                   ),
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
-                child: TextField(
+                child: TextFormField(
                   readOnly: true,
                   onTap: () => _pickDate(isStart: false),
                   decoration: _pillDecoration(
                     'End Date',
-                    suffixIcon: Icon(Icons.calendar_today),
+                    suffixIcon: const Icon(Icons.calendar_today),
                   ),
                   controller: TextEditingController(
                     text: b.endDate != null
@@ -893,40 +891,43 @@ class _BookingFormState extends State<_BookingForm> {
           ),
         ),
         _SectionCard(
-          header: _stepLabel(3, 'Number of Participants', Icons.people_outline),
+          header: _stepLabel(3, 'Participants', Icons.people_outline),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _circleIconButton(
                 Icons.remove,
                 onPressed: () {
                   if (b.participants.length > 1) {
-                    b.participants.removeLast();
-                    setState(() {});
+                    setState(() => b.participants.removeLast());
                     widget.onUpdate();
                   }
                 },
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 16),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: _TripsPageState._accent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '${b.participants.length}',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     color: _TripsPageState._bg,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 16),
               _circleIconButton(
                 Icons.add,
                 onPressed: () {
-                  b.participants.add(Participant());
-                  setState(() {});
+                  setState(() => b.participants.add(Participant()));
                   widget.onUpdate();
                 },
               ),
@@ -940,15 +941,11 @@ class _BookingFormState extends State<_BookingForm> {
             Icons.badge_outlined,
           ),
           child: Column(
-            children: [
-              ...List.generate(
-                b.participants.length,
-                (i) => _buildParticipant(
-                  i,
-                  isLast: i == b.participants.length - 1,
-                ),
-              ),
-            ],
+            children: List.generate(
+              b.participants.length,
+              (i) =>
+                  _buildParticipant(i, isLast: i == b.participants.length - 1),
+            ),
           ),
         ),
         _SectionCard(
@@ -956,10 +953,7 @@ class _BookingFormState extends State<_BookingForm> {
           child: TextFormField(
             initialValue: b.contactInfo,
             keyboardType: TextInputType.phone,
-            decoration: _pillDecoration(
-              '+63XXX-XXX-XXXX',
-              suffixIcon: Icon(Icons.phone),
-            ),
+            decoration: _pillDecoration('+63 9XX-XXX-XXXX'),
             onChanged: (v) => b.contactInfo = v,
           ),
         ),
@@ -969,8 +963,7 @@ class _BookingFormState extends State<_BookingForm> {
             value: b.paymentMethod,
             decoration: _pillDecoration('Cash'),
             dropdownColor: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            items: [
+            items: const [
               DropdownMenuItem(value: 'Cash', child: Text('CASH')),
               DropdownMenuItem(value: 'Card', child: Text('CARD')),
               DropdownMenuItem(value: 'E-Wallet', child: Text('E-WALLET')),
@@ -982,23 +975,10 @@ class _BookingFormState extends State<_BookingForm> {
     );
   }
 
-  Widget _circleIconButton(IconData icon, {required VoidCallback onPressed}) {
-    return Ink(
-      decoration: ShapeDecoration(
-        color: _TripsPageState._accent.withOpacity(0.2),
-        shape: CircleBorder(),
-      ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon, color: _TripsPageState._accent),
-      ),
-    );
-  }
-
   Widget _buildParticipant(int index, {required bool isLast}) {
     final p = b.participants[index];
     return Padding(
-      padding: EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Column(
         children: [
           Row(
@@ -1010,7 +990,7 @@ class _BookingFormState extends State<_BookingForm> {
                   onChanged: (v) => p.firstName = v,
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: TextFormField(
                   initialValue: p.lastName,
@@ -1020,41 +1000,32 @@ class _BookingFormState extends State<_BookingForm> {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Row(
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints.tightFor(width: 90),
+              SizedBox(
+                width: 100,
                 child: _AgePicker(value: p.age, onChanged: (v) => p.age = v),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
-                child: SizedBox(
-                  height: 44,
-                  child: DropdownButtonFormField<String>(
-                    value: p.gender,
-                    style: TextStyle(fontSize: 13, color: Colors.black),
-                    decoration: _pillDecoration('Gender').copyWith(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      isDense: true,
-                    ),
-                    items: [
-                      DropdownMenuItem(value: 'Male', child: Text('Male')),
-                      DropdownMenuItem(value: 'Female', child: Text('Female')),
-                      DropdownMenuItem(value: 'Other', child: Text('Other')),
-                    ],
-                    onChanged: (v) => p.gender = v ?? 'Male',
-                  ),
+                child: DropdownButtonFormField<String>(
+                  value: p.gender,
+                  decoration: _pillDecoration('Gender'),
+                  items: const [
+                    DropdownMenuItem(value: 'Male', child: Text('Male')),
+                    DropdownMenuItem(value: 'Female', child: Text('Female')),
+                    DropdownMenuItem(value: 'Other', child: Text('Other')),
+                  ],
+                  onChanged: (v) => p.gender = v ?? 'Male',
                 ),
               ),
             ],
           ),
           if (!isLast) ...[
-            SizedBox(height: 10),
+            const SizedBox(height: 12),
             Divider(height: 1, color: _TripsPageState._accent.withOpacity(0.3)),
+            const SizedBox(height: 12),
           ],
         ],
       ),
@@ -1081,18 +1052,81 @@ class _BookingFormState extends State<_BookingForm> {
       widget.onUpdate();
     }
   }
+
+  // --- REUSABLE UI HELPERS FOR THE FORM ---
+
+  Widget _circleIconButton(IconData icon, {required VoidCallback onPressed}) {
+    return Ink(
+      decoration: ShapeDecoration(
+        color: _TripsPageState._accent.withOpacity(0.2),
+        shape: const CircleBorder(),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, color: _TripsPageState._accent),
+        splashRadius: 24,
+      ),
+    );
+  }
+
+  InputDecoration _pillDecoration(String hint, {Widget? suffixIcon}) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      suffixIcon: suffixIcon,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
+  Widget _stepLabel(int number, String title, IconData icon) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 14,
+          backgroundColor: _TripsPageState._accent,
+          child: Text(
+            '$number',
+            style: GoogleFonts.poppins(
+              color: _TripsPageState._bg,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Icon(icon, color: _TripsPageState._accent, size: 20),
+        const SizedBox(width: 6),
+        Text(
+          title.toUpperCase(),
+          style: GoogleFonts.poppins(
+            color: _TripsPageState._primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+// --- CUSTOM AGE PICKER WIDGET ---
 
 class _AgePicker extends StatefulWidget {
   final int value;
   final ValueChanged<int> onChanged;
-  const _AgePicker({super.key, required this.value, required this.onChanged});
+  const _AgePicker({required this.value, required this.onChanged});
+
   @override
   State<_AgePicker> createState() => _AgePickerState();
 }
 
 class _AgePickerState extends State<_AgePicker> {
   late int _currentValue;
+
   @override
   void initState() {
     super.initState();
@@ -1100,55 +1134,44 @@ class _AgePickerState extends State<_AgePicker> {
   }
 
   @override
-  void didUpdateWidget(_AgePicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) _currentValue = widget.value;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _TripsPageState._accent.withOpacity(0.3)),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-        ],
+    return NumberPicker(
+      value: _currentValue,
+      minValue: 1,
+      maxValue: 100,
+      axis: Axis.horizontal,
+      itemWidth: 35,
+      haptics: true,
+      onChanged: (value) {
+        setState(() => _currentValue = value);
+        widget.onChanged(value);
+      },
+      textStyle: GoogleFonts.poppins(color: Colors.white54, fontSize: 14),
+      selectedTextStyle: GoogleFonts.poppins(
+        color: _TripsPageState._accent,
+        fontWeight: FontWeight.bold,
+        fontSize: 18,
       ),
-      child: NumberPicker(
-        value: _currentValue,
-        minValue: 1,
-        maxValue: 100,
-        axis: Axis.vertical,
-        itemHeight: 18,
-        itemWidth: 50,
-        onChanged: (value) {
-          setState(() => _currentValue = value);
-          widget.onChanged(value);
-        },
-        textStyle: TextStyle(color: Colors.black54, fontSize: 12),
-        selectedTextStyle: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.white12),
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }
 }
 
+// --- REUSABLE SECTION CARD WIDGET ---
+
 class _SectionCard extends StatelessWidget {
   final Widget header;
   final Widget child;
-  const _SectionCard({super.key, required this.header, required this.child});
+  const _SectionCard({required this.header, required this.child});
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 14),
-      padding: EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: _TripsPageState._card,
         borderRadius: BorderRadius.circular(16),
@@ -1156,13 +1179,13 @@ class _SectionCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black26,
             blurRadius: 10,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [header, SizedBox(height: 10), child],
+        children: [header, const SizedBox(height: 12), child],
       ),
     );
   }

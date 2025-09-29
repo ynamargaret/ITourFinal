@@ -11,7 +11,7 @@ class ProfilePage extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1A3C8C), Color(0xFF004080)],
+            colors: [Color(0xFF0D1B2A), Color(0xFF1A3C8C)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -23,72 +23,94 @@ class ProfilePage extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 20,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // --- HEADER SECTION ---
+                      SizedBox(
+                        height: 220,
+                        child: Stack(
                           children: [
-                            const CircleAvatar(
-                              radius: 55,
-                              backgroundImage: AssetImage(
-                                "assets/img/itour_logo.png",
+                            // Background image for header
+                            const Positioned.fill(
+                              child: Image(
+                                image: AssetImage(
+                                  "assets/img/page_blur_bg.png",
+                                ),
+                                fit: BoxFit.cover,
+                                color: Color.fromARGB(115, 0, 0, 0),
                               ),
                             ),
-                            Column(
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => LoginPage(),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 20,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Glowing Profile Picture
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.blueAccent.withOpacity(
+                                            0.5,
+                                          ),
+                                          blurRadius: 20,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: const CircleAvatar(
+                                      radius: 55,
+                                      backgroundImage: AssetImage(
+                                        "assets/img/1.png",
                                       ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.logout, size: 18),
-                                  label: const Text("Logout"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 10),
-                                ElevatedButton.icon(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.edit, size: 18),
-                                  label: const Text("Edit"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
+                                  // Edit and Logout Buttons
+                                  Column(
+                                    children: [
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              // FIX: Removed 'const'
+                                              builder: (context) => LoginPage(),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                          Icons.logout,
+                                          size: 18,
+                                        ),
+                                        label: const Text("Logout"),
+                                        style: _buttonStyle(),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          // TODO: Implement edit profile logic
+                                        },
+                                        icon: const Icon(Icons.edit, size: 18),
+                                        label: const Text("Edit"),
+                                        style: _buttonStyle(),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
+                      // --- USER INFO SECTION ---
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: 20.0,
-                          top: 10,
-                          right: 20,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                          vertical: 20.0,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,76 +123,64 @@ class ProfilePage extends StatelessWidget {
                                 color: Colors.white,
                               ),
                             ),
+                            const SizedBox(height: 12),
+                            _buildInfoRow(Icons.location_on, "Philippines"),
                             const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Text(
-                                  '🇵🇭',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  "Philippines",
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
+                            _buildInfoRow(Icons.phone, "+63 912 345 6789"),
+                            const SizedBox(height: 20),
+                            Text(
+                              "Lover of spontaneous road trips, chasing sunsets, and finding hidden gems. Currently exploring the wonders of Southeast Asia. Next stop: Iceland!",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white70,
+                                fontSize: 14,
+                                height: 1.6,
+                              ),
                             ),
-                            const SizedBox(height: 6),
-                            Row(
+                            const SizedBox(height: 30),
+                            // --- STATS SECTION ---
+                            const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                const Icon(
-                                  Icons.phone,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  "+639XX-XXX-XXXX",
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                                _StatItem(count: "12", label: "Trips"),
+                                _StatItem(count: "8", label: "Countries"),
+                                _StatItem(count: "27", label: "Favorites"),
                               ],
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
-                              "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis",
-                              style: TextStyle(color: Colors.white70),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
               ),
+              // --- ACTION BUTTONS SECTION ---
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 20,
+                ),
                 child: Row(
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: ActionButton(
                         icon: Icons.help_outline,
                         text: "HELP\nABOUT THE APP",
                       ),
                     ),
-                    Expanded(
+                    const SizedBox(width: 12),
+                    const Expanded(
                       child: ActionButton(
                         icon: Icons.nights_stay,
                         text: "SWITCH TO\nLIGHT MODE",
-                        footer: const Icon(
+                        footer: Icon(
                           Icons.wb_sunny,
                           color: Colors.yellow,
                           size: 20,
                         ),
                       ),
                     ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: ActionButton(
                         icon: Icons.arrow_back,
@@ -181,15 +191,67 @@ class ProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
   }
+
+  // Helper for consistent button styling
+  ButtonStyle _buttonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Colors.white.withOpacity(0.9),
+      foregroundColor: Colors.black,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    );
+  }
+
+  // Helper for consistent info row styling
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white70, size: 20),
+        const SizedBox(width: 12),
+        Text(
+          text,
+          style: GoogleFonts.poppins(color: Colors.white, fontSize: 16),
+        ),
+      ],
+    );
+  }
 }
 
+// --- STAT ITEM WIDGET ---
+class _StatItem extends StatelessWidget {
+  final String count;
+  final String label;
+  const _StatItem({required this.count, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          count,
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.poppins(color: Colors.white70, fontSize: 14),
+        ),
+      ],
+    );
+  }
+}
+
+// --- ACTION BUTTON WIDGET ---
 class ActionButton extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -215,6 +277,13 @@ class ActionButton extends StatelessWidget {
           color: Colors.black.withOpacity(0.3),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.white10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blueAccent.withOpacity(0.2),
+              blurRadius: 15,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

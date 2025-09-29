@@ -13,7 +13,7 @@ import 'destination.dart';
 class HomePage extends StatefulWidget {
   final List<Destination> favorites;
   final Function(List<Destination>) onFavoritesChanged;
-  
+
   const HomePage({
     super.key,
     required this.favorites,
@@ -239,7 +239,9 @@ class _HomePageState extends State<HomePage> {
   void _syncFavorites() {
     // Sync destination favorite states with the shared favorites list
     for (var destination in destinations) {
-      destination.isFavorite = widget.favorites.any((fav) => fav.title == destination.title);
+      destination.isFavorite = widget.favorites.any(
+        (fav) => fav.title == destination.title,
+      );
     }
   }
 
@@ -247,16 +249,18 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       d.isFavorite = !d.isFavorite;
     });
-    
+
     // Update the shared favorites list
-    List<Destination> updatedFavorites = destinations.where((dest) => dest.isFavorite).toList();
+    List<Destination> updatedFavorites = destinations
+        .where((dest) => dest.isFavorite)
+        .toList();
     widget.onFavoritesChanged(updatedFavorites);
   }
 
   Future<void> _openBookingForm(String destinationName) async {
     final proceed = await _showBookingConfirmationDialog();
     if (!proceed) return;
-    
+
     // Navigate to TripsPage with pre-filled destination
     Navigator.push(
       context,
@@ -289,7 +293,10 @@ class _HomePageState extends State<HomePage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('Cancel', style: GoogleFonts.poppins(color: Colors.white70)),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins(color: Colors.white70),
+                ),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -299,7 +306,10 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Proceed', style: GoogleFonts.poppins(color: Colors.white)),
+                child: Text(
+                  'Proceed',
+                  style: GoogleFonts.poppins(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -310,10 +320,12 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchAllWeathers() async {
     for (var d in destinations) {
       final weather = await _fetchWeather(d.city);
-      setState(() {
-        d.temperatureC = weather['temp'];
-        d.weatherMain = weather['main'];
-      });
+      if (mounted) {
+        setState(() {
+          d.temperatureC = weather['temp'];
+          d.weatherMain = weather['main'];
+        });
+      }
       await Future.delayed(const Duration(milliseconds: 150));
     }
   }
@@ -363,13 +375,21 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           color: const Color(0xFF19183B),
           borderRadius: BorderRadius.circular(20),
+          // --- MODIFICATION FOR GLOW EFFECT ---
           boxShadow: [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8,
-              offset: Offset(0, 4),
+              color: const Color.fromARGB(
+                255,
+                255,
+                255,
+                255,
+              ).withOpacity(0.4), // Color of the glow
+              blurRadius: 20, // How diffused the glow is
+              spreadRadius: 1, // How far the glow extends
+              offset: const Offset(0, 0), // Centered glow from all sides
             ),
           ],
+          // --- END MODIFICATION ---
         ),
         child: Padding(
           padding: const EdgeInsets.all(18),

@@ -22,12 +22,22 @@ class _MainTabsState extends State<MainTabs> {
     });
   }
 
+  // --- NEW FUNCTION ---
+  // This function will be called from the FavoritesPage to remove an item.
+  void _removeFavorite(Destination destination) {
+    setState(() {
+      // Remove the destination from the list.
+      // We also update its 'isFavorite' status for consistency.
+      destination.isFavorite = false;
+      _favorites.removeWhere((d) => d.title == destination.title);
+    });
+  }
+
+  // --- MODIFIED _pages GETTER ---
   List<Widget> get _pages => [
-    HomePage(
-      favorites: _favorites,
-      onFavoritesChanged: _updateFavorites,
-    ),
-    FavoritesPage(favorites: _favorites),
+    HomePage(favorites: _favorites, onFavoritesChanged: _updateFavorites),
+
+    FavoritesPage(favorites: _favorites, onFavoriteRemoved: _removeFavorite),
     TripsPage(),
     AboutUsPage(),
   ];
